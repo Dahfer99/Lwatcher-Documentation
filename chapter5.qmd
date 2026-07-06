@@ -1,0 +1,126 @@
+# Guide d'Utilisation, Déploement et Administration
+
+## Prérequis et installation
+
+L-Watcher nécessite un système Linux avec les outils suivants disponibles : `gcc` pour la compilation du binaire C, `make` pour piloter la compilation, et les utilitaires standard `bash`, `stat`, `diff`, `find`, `tar`. Pour la fonctionnalité de sauvegarde distante, `ssh`, `ssh-keygen`, `ssh-copy-id` et `scp` sont également requis.
+
+- L'installation s'effectue simplement avec :
+
+```bash
+$ make                 # compile src/inotify.c
+$ sudo make install
+      # installe /opt/lwatcher, /etc/lwatcher,
+      # /var/log/lwatcher, /usr/local/bin/lwatcher
+$ which lwatcher       # vérification
+```
+
+- Pour la désintallation et la suppréssion :
+
+```bash
+$ sudo make remove     # garde les log et backups
+$ sudo make purge      # supprime tout
+```
+
+## Configuration des répertoires surveillés
+
+Avant le premier lancement, il faut renseigner le fichier `config/inotify.config` avec les chemins à surveiller. Sa syntaxe est très simple :
+
+```
+# Les lignes commençant par # sont ignorées
+# Les lignes vides sont ignorées
+
+/home/user/Documents/
+/etc/nginx/conf.d/
+```
+
+Chaque chemin doit être absolu et se terminer par `/`. Plusieurs chemins peuvent être ajoutés, chacun sur sa propre ligne.
+
+Les options `-c`, `-C` et `-a` de `start.sh` permettent de manipuler ce fichier directement en ligne de commande, sans avoir à l'éditer manuellement.
+
+## Maîtrise de l'interface en ligne de commande
+
+Toutes les interactions avec L-Watcher passent par `start.sh`. Voici le panorama complet de ses options :
+
+| Option | Argument           | Comportement                                                   |
+| ------ | ------------------ | -------------------------------------------------------------- |
+| `-h`   | —                  | Affiche le manuel d'aide et quitte                             |
+| `-s`   | —                  | Affiche la liste des répertoires surveillés et quitte          |
+| `-D`   | —                  | Vide la liste des répertoires surveillés et quitte             |
+| `-d`   | `N`                | Définit la durée de rétention à N jours (défaut : 7)           |
+| `-c`   | `CHEMIN`           | Ajoute CHEMIN à la liste, puis lance la surveillance           |
+| `-C`   | `CHEMIN`           | Remplace toute la liste par CHEMIN, puis lance la surveillance |
+| `-a`   | `CHEMIN`           | Ajoute CHEMIN à la liste **sans** lancer la surveillance       |
+| `-r`   | `USER@HOST:CHEMIN` | Active la sauvegarde distante via SSH/SCP                      |
+
+### Exemples d'utilisation
+
+Lancement simple avec la configuration existante :
+```bash
+lwatcher
+```
+
+Lancement avec une rétention de 14 jours :
+```bash
+lwatcher -d 14
+```
+
+Ajouter un répertoire et démarrer immédiatement :
+```bash
+lwatcher -c /home/user/projets/
+```
+
+Surveiller uniquement un répertoire spécifique (efface les chemins précédents) :
+```bash
+lwatcher -C /etc/
+```
+
+Ajouter un répertoire sans démarrer (pour préparer la configuration) :
+```bash
+lwatcher -a /var/www/html/
+```
+
+Lancement avec sauvegarde distante :
+```bash
+lwatcher -r admin@192.168.1.10:/backups/lwatcher
+```
+
+Combiner plusieurs options :
+```bash
+lwatcher -d 30 -r admin@192.168.1.10:/backups/lwatcher
+```
+
+>**Note :** lwatcher doit être exécuter en tant que root pour fonctionner
+
+## Lecture et interprétation des journaux de session
+
+Un journal de session se présente sous la forme d'un tableau aligné en colonnes :
+
+```
+[Mer 17 Jun 09:14:47]  CREATED    FILE    /home/user/docs/okl/   rapport.txt  644  user  user
+[Mer 17 Jun 09:14:58]  MODIFIED   FILE    /home/user/docs/okl/   rapport.txt  644  user  user  [2 lines changed -> /home/user/docs/okl/rapport.txt]
+```
+
+Les colonnes, dans l'ordre, sont : l'horodatage, le type d'événement, le type de cible (FILE ou DIRECTORY), le chemin du répertoire, le nom du fichier, les permissions en octal, le propriétaire et le groupe. Pour les événements `MODIFIED` ayant une référence de backup, une indication du nombre de lignes modifiées et du chemin vers le diff complet est ajoutée en fin de ligne.
+
+## Utilisation des fichiers de différences
+
+Les fichiers de différences se trouvent dans `.../log/diffs/`. Leur nom encode le chemin du répertoire (les `/` remplacés par `_`), le nom du fichier, et l'identifiant de session. Par exemple, pour un fichier `rapport.txt` dans `/home/user/docs/okl/` lors de la session `20260617_0934`, le fichier de diff se nomme :
+
+```
+home_user_docs_okl__rapport.txt_20260617_0934.txt
+```
+
+Son contenu liste chronologiquement chaque modification, avec l'horodatage et le diff au format standard Unix :
+
+```
+[Mer 17 Jun 09:14:58]    /home/user/docs/okl/    rapport.txt
+ 1a2
+> Nouvelle ligne ajoutée
+
+[Mer 17 Jun 09:15:30]    /home/user/docs/okl/    rapport.txt
+ 2c2
+< Nouvelle ligne ajoutée
+> Ligne modifiée
+```
+
+Le format de diff utilise les conventions standard : `>` pour une ligne ajoutée, `<` pour une ligne supprimée, `c` pour une ligne changée, `a` pour un ajout, `d` pour une suppression.

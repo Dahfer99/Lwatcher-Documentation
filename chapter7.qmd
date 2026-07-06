@@ -1,0 +1,35 @@
+# Perspective et développement au future
+
+## Bilan technique du projet L-Watcher
+
+L-Watcher remplit les objectifs qu'il s'était fixés. La surveillance est continue, récursive, et réactive. Chaque événement est capturé, enrichi, affiché et archivé. Les modifications de fichiers sont documentées au niveau du contenu, pas seulement de l'existence. Le cycle de vie des données est géré automatiquement.
+
+### Forces du système
+
+La principale force de L-Watcher est sa **légèreté architecturale**. L'API inotify est une interface noyau : il n'y a pas de scrutation périodique, pas de surcoût CPU en l'absence d'événements. Le binaire C se contente d'attendre sur un `read()` bloquant, et ne consomme des ressources que quand il y a effectivement quelque chose à traiter.
+
+La **traçabilité fine par diffing** est la seconde force distinctive. La plupart des outils FIM simples se contentent de signaler qu'un fichier a changé ; L-Watcher documente précisément ce qui a changé, ligne par ligne, avec un historique cumulatif par fichier au sein d'une session.
+
+L'**architecture modulaire** , la séparation nette entre le moteur C et les scripts Bash connectés par un pipe standard facilite la maintenance et l'évolution indépendante de chaque composant.
+
+### Limites assumées (choix de conception)
+
+Deux limitations sont des choix délibérés, documentés comme tels plutôt que dissimulés.
+
+Le **plafond de 32 répertoires surveillés simultanément** découle de l'utilisation de tableaux de taille fixe pour la table de correspondance watch descriptor → chemin. Ce choix simplifie significativement le code et couvre largement les cas d'usage envisagés. Une implémentation future pourrait remplacer ces tableaux statiques par une structure dynamique (`realloc`) pour lever cette limite.
+
+L'**absence de traçage d'acteur** est une conséquence directe des explorations techniques documentées au chapitre 4. Ce n'est pas une limitation oubliée mais une décision raisonnée, prise après avoir épuisé les approches réalistement implémentables dans ce contexte.
+
+### Limitation résiduelle identifiée
+
+Un comportement imparfait subsiste pour les événements `ATTRIB` portant sur des répertoires. Dans ce cas, le calcul des permissions via `stat` est effectué sur le répertoire parent plutôt que sur le sous-répertoire effectivement concerné par l'événement. Ceci est dû à la manière dont le chemin de la cible est construit dans `output.sh` pour les événements de type `DIRECTORY`. Ce comportement erroné est identifié et pourrait faire l'objet d'un correctif dans une version ultérieure.
+
+## Évolutions futures
+
+### Interface utilisateur textuelle (TUI)
+
+L'affichage actuel en colonnes fixes dans le terminal est fonctionnel mais statique. Une évolution naturelle serait de le remplacer par une interface TUI (*Text User Interface*) interactive, permettant par exemple de filtrer les événements affichés en temps réel par type ou par répertoire, de naviguer dans l'historique de la session, ou d'afficher le détail d'un diff directement dans l'interface. Des bibliothèques comme `ncurses` (pour une implémentation C) ou des outils comme `dialog` (pour du Bash) permettraient d'atteindre cet objectif.
+
+### Dépassement du plafond de 32 répertoires
+
+Remplacer les tableaux statiques `wd[32]` et `wd_path[32][512]` par des structures allouées dynamiquement permettrait de lever la limite actuelle sans autre modification architecturale. C'est une évolution relativement ciblée qui rendrait L-Watcher utilisable pour surveiller des arborescences bien plus profondes.

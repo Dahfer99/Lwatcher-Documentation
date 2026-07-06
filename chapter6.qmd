@@ -1,0 +1,43 @@
+# Evolution de la Coception et Pivot Technique
+
+## L'ambition initiale : le traçage d'acteur
+
+Dans sa conception originale, L-Watcher devait répondre à une question plus ambitieuse que "qu'est-ce qui a changé ?" : il devait aussi répondre à "qui a fait ce changement ?". L'idée était d'associer à chaque événement détecté l'identité de l'utilisateur ou du processus à l'origine de la modification, ce que l'on appellera le **traçage d'acteur** (*actor tracking*).
+
+Cette fonctionnalité aurait considérablement enrichi la valeur analytique des journaux produits. Au lieu de voir simplement `MODIFIED: /etc/passwd`, un administrateur aurait pu lire `MODIFIED: /etc/passwd  par l'utilisateur root via le processus passwd (PID 4821)`. L'objectif était légitime et la question posée était pertinente.
+
+Les tentatives d'implémentation ont cependant révélé une série d'obstacles techniques qui ont conduit à l'abandon définitif de cette fonctionnalité.
+
+## Les approches testées et leurs limitations
+
+### Tentative 1 : inspection de /proc/\<PID\>/fd
+
+La première approche consistait à scanner, au moment de la réception d'un événement inotify, le système de fichiers virtuel `/proc` pour trouver quel processus avait ouvert le fichier concerné. Pour chaque processus actif, on examine `/proc/<PID>/fd/` à la recherche d'un descripteur de fichier pointant vers le fichier cible.
+
+En théorie, l'idée est solide. En pratique, elle se heurte à un problème fondamental de **timing**. Les opérations sur les fichiers, surtout les créations et les écritures brèves sont extrêmement rapides. Au moment où l'événement inotify est reçu et traité, le processus responsable a déjà terminé son opération, fermé son descripteur de fichier, et souvent terminé son exécution. Le scan de `/proc` arrive toujours trop tard.
+
+### Tentative 2 : lsof
+
+`lsof` (*list open files*) est un outil qui interroge l'état courant des fichiers ouverts sur le système. On aurait pu l'invoquer à la réception de chaque événement pour identifier le processus concerné.
+
+Outre le problème de timing déjà évoqué, cette approche souffre de deux défauts supplémentaires. D'abord, la latence d'exécution de `lsof` lui-même est non négligeable; le lancer à chaque événement aurait créé un goulot d'étranglement notable. Ensuite, `lsof` retourne l'état courant, pas l'état passé : si le fichier a été fermé avant l'invocation de la commande, il n'apparaît tout simplement plus dans les résultats.
+
+### Tentative 3 : auditd et ausearch
+
+`auditd` est le démon d'audit du noyau Linux. Contrairement aux approches précédentes, il intercepte les appels système au moment où ils se produisent, ce qui résout le problème de timing. En théorie, il peut enregistrer précisément quel utilisateur et quel processus ont effectué chaque opération sur le système de fichiers.
+
+L'implémentation a été tentée avec `auditctl` pour configurer des règles de surveillance et `ausearch` pour interroger les logs d'audit produits. Cette approche s'est avérée incompatible avec l'architecture en pipeline de L-Watcher. `ausearch` invoqué depuis l'intérieur du pipe ne retournait aucun résultat utilisable. Plus fondamentalement, intégrer `auditd` dans le flux de traitement posait des problèmes de permissions (l'outil requiert des droits root), de couplage architectural (L-Watcher devenait dépendant d'un daemon externe configuré séparément), et de complexité disproportionnée par rapport à l'objectif initial.
+
+### Tentative 4 : variables d'environnement et who
+
+D'autres pistes ont été explorées : lire `/proc/<PID>/environ` pour récupérer des informations sur l'environnement du processus, utiliser `who` et `who am i` pour identifier l'utilisateur connecté. Aucune n'a abouti à quelque chose de fiable. `who` ne peut pas détecter les sessions ouvertes via `su`, et l'identification via les variables d'environnement reste sujette aux mêmes problèmes de timing.
+
+## La décision de pivot
+
+Face à l'échec systématique de toutes les approches testées, la décision a été prise d'**abandonner définitivement le traçage d'acteur**. Cette décision n'est pas un compromis subi mais un choix raisonné.
+
+Premièrement, les limitations constatées ne sont pas des bugs corrigeables : elles sont inhérentes à l'architecture de l'API inotify, qui notifie *après* l'événement, alors que l'identification d'un acteur requiert d'être *synchrone* avec lui. Rendre le traçage d'acteur fiable aurait nécessité une refonte complète de la couche de capture, vraisemblablement en abandonnant inotify au profit d'une approche eBPF ou d'une intégration profonde avec auditd; deux technologies qui dépassent largement le cadre du projet.
+
+Deuxièmement, L-Watcher répond déjà à la question la plus utile dans la plupart des scénarios d'usage : **ce qui a changé, et quand**. Le scénario de démonstration typique: un fichier de configuration qui a été modifié de manière inexpliquée, est couvert par les journaux et les diffs. L'identification de l'auteur, bien que souhaitable, n'est pas indispensable à la valeur fondamentale de l'outil.
+
+Ce parcours d'exploration et d'échec fait partie de l'histoire technique de L-Watcher et illustre une réalité du développement système : certaines fonctionnalités qui semblent simples en théorie se heurtent à des contraintes architecturales profondes qui rendent leur implémentation fiable bien plus complexe qu'anticipé.

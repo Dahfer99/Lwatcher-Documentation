@@ -1,0 +1,102 @@
+# Architecture et Structure du Programme
+
+## Modèle architectural à trois couches
+
+L-Watcher s'articule autour de trois couches fonctionnelles clairement séparées, chacune assumant une responsabilité exclusive.
+
+**La couche de capture** est incarnée par le binaire C (`bin/inotify`, compilé depuis `src/inotify.c`). Elle est en contact direct avec le noyau Linux via l'API inotify. Sa seule responsabilité est de recevoir les événements bruts, d'en extraire les informations essentielles (type d'événement, chemin du répertoire surveillé, nom du fichier concerné), et de les émettre sur la sortie standard sous forme de lignes texte délimitées par des deux-points :
+
+```
+EVENT:TYPE:CHEMIN:NOM
+```
+
+Par exemple : `MODIFIED:FILE:/home/user/docs/:rapport.txt`
+
+Cette couche ne sait rien de la mise en forme, des couleurs, des logs, ou des sauvegardes. Elle produit un flux de données brut et s'arrête là.
+
+**La couche de traitement et formatage** est assurée par `scripts/output.sh`. Elle lit le flux émis par le binaire C, l'interprète événement par événement, l'enrichit (horodatage, permissions via `stat`, comparaison via `diff`), l'affiche en console avec un formatage colorisé, et l'écrit simultanément dans les fichiers de log et de différences. C'est ici que réside l'essentiel de la logique métier de L-Watcher.
+
+**La couche de maintenance et persistance** est portée par trois composants. `scripts/backup.sh` constitue au lancement la snapshot de référence qui servira de base aux comparaisons. `scripts/cleanup.sh` assure en fin de session la rotation des fichiers et la purge des données obsolètes. `lwatcher` (le script de lancement) orchestre l'ensemble : il traite les options en ligne de commande, prépare l'environnement, lance les autres composants dans le bon ordre, et installe le gestionnaire de signal qui déclenchera le nettoyage à la fermeture.
+
+## Cartographie de l'arborescence du projet (version installé)
+
+```
+/                                            # Répértoire racine
+├── usr/
+│   ├── local/
+│   │   ├── bin/
+│   └── └── └── lwatcher                     # Script de lancement placer dans $PATH
+│   
+├── opt/
+│   ├── lwatcher/
+│   │   ├── bin/
+│   │   │   └── inotify                      # Binaire compilé (produit par make)
+│   │   ├── scripts/
+│   │   │   ├── output.sh                    # Traitement du flux, logs, diffs
+│   │   │   ├── backup.sh                    # Snapshot de référence initiale
+└── └── └── └── cleanup.sh                   # Rotation et purge en fin de session
+│   
+├── etc/
+│   ├── lwatcher/
+│   │   ├── config/
+│   └── └── └── inotify.config                   # Liste des répertoires à surveiller
+│   
+├── var/
+│   ├── log/
+│   │   ├── lwatcher/
+│   │   │   ├── session.log                  # Journal courant (en cours de session)
+│   │   │   ├── error.log                    # des erreurs
+│   │   │   ├── session_YYYYMMDD_HHMM.log    # Journaux archivés
+│   │   │   ├── diffs/
+│   └── └── └── └── *.txt                    # Fichiers de différences par fichier modifié
+│   
+├── root/                                    # Répértoire personnel de l'utilisateur root
+│   ├── backup/
+│   │   ├── SESSION_ID/                      # Snapshot de référence de la session (Répértoire temporaire)
+└── └── └── SESSION_ID.tar.gz                # Archive compressée de la snapshot
+```
+
+### Le fichier de configuration
+
+`/etc/lwatcher/config/inotify.config` est le fichier qui définit quels répertoires L-Watcher doit surveiller. Sa syntaxe est volontairement minimaliste : un chemin absolu par ligne, les lignes vides et les lignes commençant par `#` étant ignorées. Ce fichier est lu à la fois par le binaire C (pour savoir quoi surveiller) et par `backup.sh` (pour savoir quoi sauvegarder).
+
+```
+# Répertoires surveillés par L-Watcher
+/home/user/Public/
+/etc/nginx/
+```
+
+### Le Makefile
+
+La compilation du binaire C est pilotée par un `Makefile` minimal :
+
+```makefile
+all:
+	gcc ./src/inotify.c -o ./bin/inotify
+
+install:
+	mkdir ~/lwatcher
+	mkdir -p /opt/lwatcher
+	mkdir -p /var/log/lwatcher
+	mkdir -p /etc/lwatcher && touch /etc/lwatcher/inotify.config
+	cp -r ./scripts /opt/lwatcher/ && cp -r ./bin /opt/lwatcher
+	cp lwatcher /usr/local/bin
+	chmod 755 /usr/local/bin/lwatcher
+	chmod -R 755 /opt/lwatcher/*
+
+remove:
+	rm -rf /opt/lwatcher
+	rm -f /usr/local/bin/lwatcher
+	rm -rf /etc/lwatcher
+
+purge:
+	rm -rf /opt/lwatcher
+	rm -rf /usr/local/bin/lwatcher
+	rm -rf ~/lwatcher
+	rm -rf /var/log/lwatcher
+	rm -rf /etc/lwatcher
+
+.PHONY: clean
+clean:
+	rm -f ./bin/inotify
+```

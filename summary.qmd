@@ -1,0 +1,3 @@
+# Conclusion
+
+L-Watcher est un système FIM fonctionnel, documenté et maintenu. Il illustre concrètement comment combiner un composant C bas niveau avec des scripts shell pour produire un outil système complet, comment naviguer dans les limitations d'une API noyau, et comment les contraintes rencontrées en chemin  peuvent être transformées en matière d'apprentissage et en décisions d'architecture explicites et défendables plutôt que d'être dissimulées .

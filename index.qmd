@@ -1,0 +1,21 @@
+# Introduction
+
+## Qu'est-ce que la surveillance d'intégrité des fichiers ?
+
+Dans un système informatique en production, les fichiers ne sont jamais figés. Des configurations sont modifiées, des scripts sont mis à jour, des journaux sont écrits en continu. La plupart de ces changements sont légitimes et attendus. Certains ne le sont pas.
+
+La surveillance d'intégrité des fichiers, connue sous l'acronyme **FIM** (*File Integrity Monitoring*), est la discipline qui consiste à détecter, horodater et documenter toute modification apportée à un système de fichiers. Son rôle est d'apporter une réponse concrète à une question simple : *quelque chose a changé, quoi, quand, et dans quelle mesure ?*
+
+Les cas d'usage sont nombreux. Dans un contexte de sécurité, un FIM permet de détecter qu'un fichier de configuration critique a été altéré, qu'un binaire système a été remplacé, ou qu'un répertoire sensible a vu apparaître des fichiers inattendus. Dans un contexte d'exploitation, il permet de tracer l'historique précis des modifications apportées à des fichiers partagés, de reconstituer le fil des événements après une panne, ou simplement de maintenir un audit trail fiable.
+
+## Présentation du projet L-Watcher
+
+**L-Watcher** est un outil FIM conçu pour Linux. Il surveille en temps réel un ou plusieurs répertoires configurés par l'utilisateur, détecte chaque événement survenu sur le système de fichiers comme création, modification, suppression, déplacement, changement de permissions d'un fichier et en produit une trace structurée et lisible.
+
+Le projet repose sur deux technologies complémentaires. Le moteur de capture est écrit en **langage C** et exploite directement l'API noyau `inotify`, ce qui lui confère une réactivité maximale et une très faible empreinte système. Toute la couche de traitement, de mise en forme et de gestion du cycle de vie est prise en charge par des **scripts Bash**, qui assurent la production des journaux de session, la génération de fichiers de différences, la rotation des archives et les opérations de sauvegarde distante.
+
+Le résultat est un système complet : d'un côté, un binaire C qui lit les événements noyau et les émet sur sa sortie standard ; de l'autre, une chaîne de scripts qui transforment ce flux brut en informations exploitables, persistées et maintenues dans le temps.
+
+## Contexte de développement
+
+L-Watcher est né dans un contexte d'initiation aux systèmes Linux, avec l'objectif de construire quelque chose de réel et de fonctionnel plutôt qu'un exercice académique abstrait. Le développement a suivi une démarche pragmatique : chaque composant a été implémenté, testé en conditions réelles, puis affiné au contact des comportements effectifs du noyau et des limitations concrètes des outils disponibles. Certaines fonctionnalités initialement envisagées ont été abandonnées quand l'exploration technique a démontré leur infaisabilité dans ce contexte (ce parcours fait lui-même partie intégrante du projet, et sera documenté en détail dans la $8^{ème}$ partie.)

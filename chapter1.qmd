@@ -1,0 +1,27 @@
+# Fondation Théorique et Utilité du Projet
+
+## Pourquoi surveiller l'intégrité d'un système de fichiers ?
+
+Un système Linux en fonctionnement est, par nature, un environnement dynamique. Des processus écrivent des fichiers en permanence, des droits d'accès évoluent, des répertoires apparaissent et disparaissent. Dans cet environnement mouvant, distinguer un changement attendu d'un changement anormal est difficile; surtout a posteriori, quand le problème est déjà survenu.
+
+Les menaces qui pèsent sur l'intégrité d'un système de fichiers prennent deux grandes formes. La première est externe et malveillante : une intrusion qui modifie un binaire, un logiciel malveillant qui écrit des fichiers dans un répertoire système, un attaquant qui altère un fichier de configuration pour ouvrir une porte dérobée. La seconde est interne et souvent accidentelle : une mauvaise manipulation lors d'un déploiement, une modification non documentée d'un fichier partagé, une mise à jour qui écrase silencieusement une configuration personnalisée.
+
+Dans les deux cas, la surveillance en temps réel offre un avantage décisif : elle permet de **détecter l'événement au moment où il se produit**, d'en conserver une trace horodatée, et grâce à la comparaison avec une version de référence de documenter précisément ce qui a changé. C'est la différence entre constater un dommage sans pouvoir en comprendre l'origine, et disposer d'un historique complet permettant de reconstituer exactement ce qui s'est passé.
+
+## Objectifs et cahier des charges de L-Watcher
+
+L-Watcher a été conçu autour de deux objectifs fondamentaux.
+
+Le premier est la **surveillance continue et récursive**. L'outil doit pouvoir surveiller non seulement un répertoire désigné, mais aussi l'intégralité de sa sous-arborescence  y compris les nouveaux sous-répertoires créés en cours d'exécution. Aucune modification ne doit passer inaperçue, qu'elle survienne à la racine du chemin surveillé ou dans un répertoire imbriqué plusieurs niveaux plus bas.
+
+Le second est la **production de rapports clairs et exploitables**. Il ne suffit pas de détecter qu'un événement a eu lieu : encore faut-il en produire une trace que l'on peut lire, analyser et archiver. L-Watcher génère à cet effet deux types de livrables. Les journaux de session (`/var/log/lwatcher/session_*.log`) consignent chaque événement avec son horodatage, son type, le chemin concerné et les métadonnées associées (permissions, propriétaire, groupe). Les fichiers de différences (`/var/log/lwatcher/diffs/*.txt`) documentent, événement par événement, le contenu exact des modifications apportées aux fichiers surveillés.
+
+## L'approche hybride : C et Bash
+
+Le choix de combiner C et Bash n'est pas arbitraire : il répond à une séparation naturelle des responsabilités.
+
+Le langage C s'impose pour la couche de capture. L'API `inotify` est une interface noyau, et interagir avec elle de manière directe et efficace requiert la gestion fine de structures de données bas niveau, l'arithmétique de pointeurs pour parcourir le tampon d'événements, et la maîtrise des appels système. C'est exactement le domaine où C excelle. De plus, un binaire compilé démarré une seule fois et maintenu en attente dans une boucle bloquante sur `read()` a une empreinte système minimale.
+
+Bash, en revanche, est parfaitement adapté à tout ce qui touche au formatage de texte, à la manipulation de fichiers, à l'invocation de commandes système (`stat`, `diff`, `find`, `tar`, `scp`) et à la gestion du cycle de vie des données. Écrire ces opérations en C serait inutilement verbeux et fragile là où quelques lignes de script suffisent.
+
+La frontière entre les deux couches est très nette : le binaire C produit un flux de lignes texte formatées sur sa sortie standard, et les scripts Bash lisent ce flux via un pipe Unix classique. Cette interface minimale permet de faire évoluer chaque composant indépendamment.

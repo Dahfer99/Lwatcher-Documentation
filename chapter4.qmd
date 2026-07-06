@@ -1,0 +1,131 @@
+# Implémentation des Modules d'Automatisation
+
+## Le pipeline d'affichage, de journalisation et de comparaison (output.sh)
+
+`output.sh` est le composant le plus complexe de la couche Bash. Il reçoit sur son entrée standard le flux brut émis par le binaire C, et en assure le traitement complet : enrichissement, affichage colorisé en console, écriture dans les journaux de session, et génération des fichiers de différences.
+
+### Parsing du flux entrant
+
+La lecture du flux s'effectue via une boucle `while` avec `IFS=: read` qui découpe chaque ligne selon le séparateur `:` :
+
+```bash
+while IFS=: read event type path name; do
+    ...
+done
+```
+
+Les quatre champs ainsi extraits correspondent exactement au format produit par le binaire C : le type d'événement (`CREATED`, `MODIFIED`, `DELETED`, etc.), le type de cible (`FILE` ou `DIRECTORY`), le chemin du répertoire surveillé, et le nom du fichier ou sous-répertoire concerné.
+
+#### Enrichissement des événements
+
+Pour chaque événement reçu, le script calcule l'horodatage courant et interroge le système via `stat` pour obtenir les permissions octales, le propriétaire et le groupe de la cible concernée. Cette interrogation est conditionnelle : pour les événements `DELETED` et `MOVED_FROM`, la cible n'existe plus au moment du traitement, et `stat` ne peut pas être appelé.
+
+```bash
+if [[ "$event" != "DELETED" && "$event" != "MOVED_FROM" ]]; then
+    perms=$(stat -c "%a" "$target")
+    owner=$(stat -c "%U" "$target")
+    group=$(stat -c "%G" "$target")
+fi
+```
+
+### Filtrage de l'ATTRIB redondant
+
+Comme expliqué au chapitre 2, chaque création de fichier génère systématiquement un événement `ATTRIB` qui lui fait immédiatement suite. Pour éviter d'afficher un faux positif à chaque création, le script maintient une variable `last_created` qui mémorise le nom du dernier fichier créé. Au moment de traiter un événement `ATTRIB`, si son nom correspond à `last_created`, l'événement est silencieusement supprimé et `last_created` est réinitialisée.
+
+```bash
+if [[ "$event" == "CREATED" ]]; then
+    last_created=$name
+    # ... affichage et log
+elif [[ "$event" == "ATTRIB" ]]; then
+    if [ "$name" == "$last_created" ]; then
+        last_created=""   # suppression silencieuse
+    else
+        # ... affichage et log normaux
+    fi
+fi
+```
+
+### Le mécanisme de différenciation
+
+Le cœur analytique de `output.sh` réside dans le traitement des événements `MODIFIED`. Lorsqu'un tel événement est reçu pour un fichier, le script recherche si une version de référence de ce fichier existe dans la snapshot de sauvegarde constituée au démarrage de la session.
+
+Si une référence est trouvée, il calcule le diff entre cette version et la version courante du fichier sur le disque :
+
+```bash
+diff_output=$(diff "$backup_file" "/${clean_path}/${name}")
+changed=$(echo "$diff_output" | grep -c "^[<>]")
+```
+
+Le nombre de lignes modifiées (`changed`) est affiché dans la console et consigné dans le journal de session. Le détail complet du diff est archivé dans un fichier dédié dans `.../log/lwatcher/diffs/`, nommé selon le chemin et la session pour garantir l'unicité.
+
+Si aucune référence n'est disponible (fichier créé après le démarrage de la session, par exemple), l'événement est quand même journalisé avec la mention `[No backup found]`.
+
+### Double écriture : console et log
+
+Chaque événement est affiché sur la console **et** écrit dans le fichier journal `.../log/lwatcher/session.log`. L'affichage console utilise des codes ANSI pour la couleur ; l'écriture dans le fichier utilise `printf` sans codes couleur pour garantir la lisibilité du fichier texte brut.
+
+## Snapshot de référence et historisation (backup.sh)
+
+`backup.sh` est exécuté **une seule fois**, au démarrage de chaque session, avant que le binaire C ne commence à remonter des événements. Son rôle est de constituer une **image de référence** de l'état des répertoires surveillés au moment du lancement.
+
+### Constitution de la snapshot
+
+Le script lit le fichier `inotify.config` et, pour chaque chemin configuré, copie récursivement le contenu vers un répertoire de backup horodaté :
+
+```bash
+dir_backup="$backup_dir$line"
+mkdir -p "$(dirname "$dir_backup")"
+cp -r "$line" "$dir_backup"
+```
+
+Un point d'implémentation important mérite d'être signalé. La construction du chemin de destination utilise `dirname` pour créer uniquement le répertoire parent, et non la destination finale elle-même. Cela évite un piège classique de `cp -r` : si la destination existe déjà au moment de la copie, `cp -r` l'imbrique à l'intérieur au lieu de la remplacer, produisant un niveau de nesting supplémentaire indésirable.
+
+Cette snapshot est ensuite utilisée par `output.sh` comme base de comparaison pour tous les diffs de la session. Elle représente l'état "propre" connu du système de fichiers au moment où la surveillance a démarré.
+
+### Archivage et transfert distant
+
+Une fois la copie effectuée, la snapshot est compressée dans une archive `tar.gz` horodatée :
+
+```bash
+tar -czf "/root/backup/$time_stamp.tar.gz" -C "/root/backup" "$time_stamp"
+```
+
+Si l'option de sauvegarde distante est activée (via le flag `-r`), l'archive est transmise vers le serveur distant via `scp`. La connexion s'appuie sur une paire de clés SSH dédiée (`lwatch_key`) générée spécifiquement pour la session par `lwatcher`, évitant l'utilisation des clés personnelles de l'utilisateur.
+
+## Cycle de vie des données et maintenance (cleanup.sh)
+
+`cleanup.sh` est déclenché automatiquement en fin de session, via un `trap ... EXIT` installé par le script de lancement. Qu'il s'agisse d'une fermeture normale (Ctrl+C) ou d'un arrêt via signal `SIGTERM`, ce script garantit que les données sont toujours correctement rangées à la sortie du programme.
+
+### Rotation du journal courant
+
+Pendant la session, les événements sont écrits dans un fichier temporaire `.../log/lwatcher/session.log`. En fin de session, ce fichier est renommé avec un horodatage permanent :
+
+```bash
+mv "$log_file" "./logs/session_$(date +%Y%m%d)_$(date +%H%M).log"
+```
+
+Cette rotation garantit que chaque session dispose de son propre fichier de journal immuable, et que le fichier `session.log` est toujours vide au démarrage d'une nouvelle session.
+
+### Purge automatique des données obsolètes
+
+Le script supprime ensuite tous les fichiers plus anciens que la durée de rétention configurée (`max_days`, 7 jours par défaut) :
+
+```bash
+find "$log_dir" -name "session_*.log" -mtime "+$max_days" -delete
+find "$backup_dir" -name "*.tar.gz"   -mtime "+$max_days" -delete
+find "$diff_dir"   -name "*.txt"      -mtime "+$max_days" -delete
+```
+
+La snapshot de la session courante (répertoire temporaire `backup/SESSION_ID/`) est également supprimée, seule l'archive `.tar.gz` correspondante étant conservée pour la durée de rétention.
+
+#### Nettoyage des artefacts SSH
+
+Si la fonctionnalité de sauvegarde distante était activée pour la session, `cleanup.sh` prend en charge la suppression de la clé SSH temporaire générée :
+
+```bash
+ssh -i ~/.ssh/lwatch_key "${remote_backup%%:*}" \
+    "sed -i '/lwatch_key/d' ~/.ssh/authorized_keys"
+rm -f ~/.ssh/lwatch_key ~/.ssh/lwatch_key.pub
+```
+
+Cette étape retire d'abord l'entrée correspondante dans le fichier `authorized_keys` du serveur distant (via une commande SSH), puis supprime la paire de clés localement. L'objectif est de limiter la durée d'exposition de ces credentials temporaires au strict minimum nécessaire.
