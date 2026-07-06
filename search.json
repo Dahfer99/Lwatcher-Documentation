@@ -1,0 +1,302 @@
+[
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "1 Introduction",
+    "section": "",
+    "text": "1 Introduction",
+    "crumbs": [
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>Introduction</span>"
+    ]
+  },
+  {
+    "objectID": "index.html#quest-ce-que-la-surveillance-dintégrité-des-fichiers",
+    "href": "index.html#quest-ce-que-la-surveillance-dintégrité-des-fichiers",
+    "title": "1 Introduction",
+    "section": "1.1 Qu’est-ce que la surveillance d’intégrité des fichiers ?",
+    "text": "1.1 Qu’est-ce que la surveillance d’intégrité des fichiers ?\nDans un système informatique en production, les fichiers ne sont jamais figés. Des configurations sont modifiées, des scripts sont mis à jour, des journaux sont écrits en continu. La plupart de ces changements sont légitimes et attendus. Certains ne le sont pas.\nLa surveillance d’intégrité des fichiers, connue sous l’acronyme FIM (File Integrity Monitoring), est la discipline qui consiste à détecter, horodater et documenter toute modification apportée à un système de fichiers. Son rôle est d’apporter une réponse concrète à une question simple : quelque chose a changé, quoi, quand, et dans quelle mesure ?\nLes cas d’usage sont nombreux. Dans un contexte de sécurité, un FIM permet de détecter qu’un fichier de configuration critique a été altéré, qu’un binaire système a été remplacé, ou qu’un répertoire sensible a vu apparaître des fichiers inattendus. Dans un contexte d’exploitation, il permet de tracer l’historique précis des modifications apportées à des fichiers partagés, de reconstituer le fil des événements après une panne, ou simplement de maintenir un audit trail fiable.",
+    "crumbs": [
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>Introduction</span>"
+    ]
+  },
+  {
+    "objectID": "index.html#présentation-du-projet-l-watcher",
+    "href": "index.html#présentation-du-projet-l-watcher",
+    "title": "1 Introduction",
+    "section": "1.2 Présentation du projet L-Watcher",
+    "text": "1.2 Présentation du projet L-Watcher\nL-Watcher est un outil FIM conçu pour Linux. Il surveille en temps réel un ou plusieurs répertoires configurés par l’utilisateur, détecte chaque événement survenu sur le système de fichiers comme création, modification, suppression, déplacement, changement de permissions d’un fichier et en produit une trace structurée et lisible.\nLe projet repose sur deux technologies complémentaires. Le moteur de capture est écrit en langage C et exploite directement l’API noyau inotify, ce qui lui confère une réactivité maximale et une très faible empreinte système. Toute la couche de traitement, de mise en forme et de gestion du cycle de vie est prise en charge par des scripts Bash, qui assurent la production des journaux de session, la génération de fichiers de différences, la rotation des archives et les opérations de sauvegarde distante.\nLe résultat est un système complet : d’un côté, un binaire C qui lit les événements noyau et les émet sur sa sortie standard ; de l’autre, une chaîne de scripts qui transforment ce flux brut en informations exploitables, persistées et maintenues dans le temps.",
+    "crumbs": [
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>Introduction</span>"
+    ]
+  },
+  {
+    "objectID": "index.html#contexte-de-développement",
+    "href": "index.html#contexte-de-développement",
+    "title": "1 Introduction",
+    "section": "1.3 Contexte de développement",
+    "text": "1.3 Contexte de développement\nL-Watcher est né dans un contexte d’initiation aux systèmes Linux, avec l’objectif de construire quelque chose de réel et de fonctionnel plutôt qu’un exercice académique abstrait. Le développement a suivi une démarche pragmatique : chaque composant a été implémenté, testé en conditions réelles, puis affiné au contact des comportements effectifs du noyau et des limitations concrètes des outils disponibles. Certaines fonctionnalités initialement envisagées ont été abandonnées quand l’exploration technique a démontré leur infaisabilité dans ce contexte (ce parcours fait lui-même partie intégrante du projet, et sera documenté en détail dans la \\(8^{ème}\\) partie.)",
+    "crumbs": [
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>Introduction</span>"
+    ]
+  },
+  {
+    "objectID": "chapter1.html",
+    "href": "chapter1.html",
+    "title": "2  Fondation Théorique et Utilité du Projet",
+    "section": "",
+    "text": "2.1 Pourquoi surveiller l’intégrité d’un système de fichiers ?\nUn système Linux en fonctionnement est, par nature, un environnement dynamique. Des processus écrivent des fichiers en permanence, des droits d’accès évoluent, des répertoires apparaissent et disparaissent. Dans cet environnement mouvant, distinguer un changement attendu d’un changement anormal est difficile; surtout a posteriori, quand le problème est déjà survenu.\nLes menaces qui pèsent sur l’intégrité d’un système de fichiers prennent deux grandes formes. La première est externe et malveillante : une intrusion qui modifie un binaire, un logiciel malveillant qui écrit des fichiers dans un répertoire système, un attaquant qui altère un fichier de configuration pour ouvrir une porte dérobée. La seconde est interne et souvent accidentelle : une mauvaise manipulation lors d’un déploiement, une modification non documentée d’un fichier partagé, une mise à jour qui écrase silencieusement une configuration personnalisée.\nDans les deux cas, la surveillance en temps réel offre un avantage décisif : elle permet de détecter l’événement au moment où il se produit, d’en conserver une trace horodatée, et grâce à la comparaison avec une version de référence de documenter précisément ce qui a changé. C’est la différence entre constater un dommage sans pouvoir en comprendre l’origine, et disposer d’un historique complet permettant de reconstituer exactement ce qui s’est passé.",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Fondation Théorique et Utilité du Projet</span>"
+    ]
+  },
+  {
+    "objectID": "chapter1.html#objectifs-et-cahier-des-charges-de-l-watcher",
+    "href": "chapter1.html#objectifs-et-cahier-des-charges-de-l-watcher",
+    "title": "2  Fondation Théorique et Utilité du Projet",
+    "section": "2.2 Objectifs et cahier des charges de L-Watcher",
+    "text": "2.2 Objectifs et cahier des charges de L-Watcher\nL-Watcher a été conçu autour de deux objectifs fondamentaux.\nLe premier est la surveillance continue et récursive. L’outil doit pouvoir surveiller non seulement un répertoire désigné, mais aussi l’intégralité de sa sous-arborescence y compris les nouveaux sous-répertoires créés en cours d’exécution. Aucune modification ne doit passer inaperçue, qu’elle survienne à la racine du chemin surveillé ou dans un répertoire imbriqué plusieurs niveaux plus bas.\nLe second est la production de rapports clairs et exploitables. Il ne suffit pas de détecter qu’un événement a eu lieu : encore faut-il en produire une trace que l’on peut lire, analyser et archiver. L-Watcher génère à cet effet deux types de livrables. Les journaux de session (/var/log/lwatcher/session_*.log) consignent chaque événement avec son horodatage, son type, le chemin concerné et les métadonnées associées (permissions, propriétaire, groupe). Les fichiers de différences (/var/log/lwatcher/diffs/*.txt) documentent, événement par événement, le contenu exact des modifications apportées aux fichiers surveillés.",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Fondation Théorique et Utilité du Projet</span>"
+    ]
+  },
+  {
+    "objectID": "chapter1.html#lapproche-hybride-c-et-bash",
+    "href": "chapter1.html#lapproche-hybride-c-et-bash",
+    "title": "2  Fondation Théorique et Utilité du Projet",
+    "section": "2.3 L’approche hybride : C et Bash",
+    "text": "2.3 L’approche hybride : C et Bash\nLe choix de combiner C et Bash n’est pas arbitraire : il répond à une séparation naturelle des responsabilités.\nLe langage C s’impose pour la couche de capture. L’API inotify est une interface noyau, et interagir avec elle de manière directe et efficace requiert la gestion fine de structures de données bas niveau, l’arithmétique de pointeurs pour parcourir le tampon d’événements, et la maîtrise des appels système. C’est exactement le domaine où C excelle. De plus, un binaire compilé démarré une seule fois et maintenu en attente dans une boucle bloquante sur read() a une empreinte système minimale.\nBash, en revanche, est parfaitement adapté à tout ce qui touche au formatage de texte, à la manipulation de fichiers, à l’invocation de commandes système (stat, diff, find, tar, scp) et à la gestion du cycle de vie des données. Écrire ces opérations en C serait inutilement verbeux et fragile là où quelques lignes de script suffisent.\nLa frontière entre les deux couches est très nette : le binaire C produit un flux de lignes texte formatées sur sa sortie standard, et les scripts Bash lisent ce flux via un pipe Unix classique. Cette interface minimale permet de faire évoluer chaque composant indépendamment.",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Fondation Théorique et Utilité du Projet</span>"
+    ]
+  },
+  {
+    "objectID": "chapter2.html",
+    "href": "chapter2.html",
+    "title": "3  Architecture et Structure du Programme",
+    "section": "",
+    "text": "3.1 Modèle architectural à trois couches\nL-Watcher s’articule autour de trois couches fonctionnelles clairement séparées, chacune assumant une responsabilité exclusive.\nLa couche de capture est incarnée par le binaire C (bin/inotify, compilé depuis src/inotify.c). Elle est en contact direct avec le noyau Linux via l’API inotify. Sa seule responsabilité est de recevoir les événements bruts, d’en extraire les informations essentielles (type d’événement, chemin du répertoire surveillé, nom du fichier concerné), et de les émettre sur la sortie standard sous forme de lignes texte délimitées par des deux-points :\nPar exemple : MODIFIED:FILE:/home/user/docs/:rapport.txt\nCette couche ne sait rien de la mise en forme, des couleurs, des logs, ou des sauvegardes. Elle produit un flux de données brut et s’arrête là.\nLa couche de traitement et formatage est assurée par scripts/output.sh. Elle lit le flux émis par le binaire C, l’interprète événement par événement, l’enrichit (horodatage, permissions via stat, comparaison via diff), l’affiche en console avec un formatage colorisé, et l’écrit simultanément dans les fichiers de log et de différences. C’est ici que réside l’essentiel de la logique métier de L-Watcher.\nLa couche de maintenance et persistance est portée par trois composants. scripts/backup.sh constitue au lancement la snapshot de référence qui servira de base aux comparaisons. scripts/cleanup.sh assure en fin de session la rotation des fichiers et la purge des données obsolètes. lwatcher (le script de lancement) orchestre l’ensemble : il traite les options en ligne de commande, prépare l’environnement, lance les autres composants dans le bon ordre, et installe le gestionnaire de signal qui déclenchera le nettoyage à la fermeture.",
+    "crumbs": [
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Architecture et Structure du Programme</span>"
+    ]
+  },
+  {
+    "objectID": "chapter2.html#modèle-architectural-à-trois-couches",
+    "href": "chapter2.html#modèle-architectural-à-trois-couches",
+    "title": "3  Architecture et Structure du Programme",
+    "section": "",
+    "text": "EVENT:TYPE:CHEMIN:NOM",
+    "crumbs": [
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Architecture et Structure du Programme</span>"
+    ]
+  },
+  {
+    "objectID": "chapter2.html#cartographie-de-larborescence-du-projet-version-installé",
+    "href": "chapter2.html#cartographie-de-larborescence-du-projet-version-installé",
+    "title": "3  Architecture et Structure du Programme",
+    "section": "3.2 Cartographie de l’arborescence du projet (version installé)",
+    "text": "3.2 Cartographie de l’arborescence du projet (version installé)\n/                                            # Répértoire racine\n├── usr/\n│   ├── local/\n│   │   ├── bin/\n│   └── └── └── lwatcher                     # Script de lancement placer dans $PATH\n│   \n├── opt/\n│   ├── lwatcher/\n│   │   ├── bin/\n│   │   │   └── inotify                      # Binaire compilé (produit par make)\n│   │   ├── scripts/\n│   │   │   ├── output.sh                    # Traitement du flux, logs, diffs\n│   │   │   ├── backup.sh                    # Snapshot de référence initiale\n└── └── └── └── cleanup.sh                   # Rotation et purge en fin de session\n│   \n├── etc/\n│   ├── lwatcher/\n│   │   ├── config/\n│   └── └── └── inotify.config                   # Liste des répertoires à surveiller\n│   \n├── var/\n│   ├── log/\n│   │   ├── lwatcher/\n│   │   │   ├── session.log                  # Journal courant (en cours de session)\n│   │   │   ├── error.log                    # des erreurs\n│   │   │   ├── session_YYYYMMDD_HHMM.log    # Journaux archivés\n│   │   │   ├── diffs/\n│   └── └── └── └── *.txt                    # Fichiers de différences par fichier modifié\n│   \n├── root/                                    # Répértoire personnel de l'utilisateur root\n│   ├── backup/\n│   │   ├── SESSION_ID/                      # Snapshot de référence de la session (Répértoire temporaire)\n└── └── └── SESSION_ID.tar.gz                # Archive compressée de la snapshot\n\n3.2.1 Le fichier de configuration\n/etc/lwatcher/config/inotify.config est le fichier qui définit quels répertoires L-Watcher doit surveiller. Sa syntaxe est volontairement minimaliste : un chemin absolu par ligne, les lignes vides et les lignes commençant par # étant ignorées. Ce fichier est lu à la fois par le binaire C (pour savoir quoi surveiller) et par backup.sh (pour savoir quoi sauvegarder).\n# Répertoires surveillés par L-Watcher\n/home/user/Public/\n/etc/nginx/\n\n\n3.2.2 Le Makefile\nLa compilation du binaire C est pilotée par un Makefile minimal :\nall:\n    gcc ./src/inotify.c -o ./bin/inotify\n\ninstall:\n    mkdir ~/lwatcher\n    mkdir -p /opt/lwatcher\n    mkdir -p /var/log/lwatcher\n    mkdir -p /etc/lwatcher && touch /etc/lwatcher/inotify.config\n    cp -r ./scripts /opt/lwatcher/ && cp -r ./bin /opt/lwatcher\n    cp lwatcher /usr/local/bin\n    chmod 755 /usr/local/bin/lwatcher\n    chmod -R 755 /opt/lwatcher/*\n\nremove:\n    rm -rf /opt/lwatcher\n    rm -f /usr/local/bin/lwatcher\n    rm -rf /etc/lwatcher\n\npurge:\n    rm -rf /opt/lwatcher\n    rm -rf /usr/local/bin/lwatcher\n    rm -rf ~/lwatcher\n    rm -rf /var/log/lwatcher\n    rm -rf /etc/lwatcher\n\n.PHONY: clean\nclean:\n    rm -f ./bin/inotify",
+    "crumbs": [
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Architecture et Structure du Programme</span>"
+    ]
+  },
+  {
+    "objectID": "chapter3.html",
+    "href": "chapter3.html",
+    "title": "4  L’API Linux Inotify au Cœur du Système",
+    "section": "",
+    "text": "4.1 Principes fondamentaux d’inotify\ninotify est une interface du noyau Linux qui permet à un processus de s’abonner aux événements survenant sur le système de fichiers. Contrairement à une approche par scrutation périodique où l’on vérifierait régulièrement l’état des fichiers pour détecter des changements. inotify fonctionne par notification passive : le processus se met en attente, et c’est le noyau lui-même qui l’informe dès qu’un événement se produit. Cette approche est à la fois plus réactive et moins coûteuse en ressources.\nLe fonctionnement repose sur trois primitives principales. inotify_init() crée une instance inotify et retourne un descripteur de fichier. inotify_add_watch() associe à cette instance un répertoire ou fichier à surveiller, en précisant quels types d’événements on souhaite recevoir (créations, suppressions, modifications, changements de permissions, etc.). Enfin, un simple read() sur le descripteur inotify retourne un ou plusieurs événements sous forme de structures inotify_event, qui contiennent notamment un masque de bits décrivant la nature de l’événement et le nom du fichier concerné.",
+    "crumbs": [
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>L'API Linux Inotify au Cœur du Système</span>"
+    ]
+  },
+  {
+    "objectID": "chapter3.html#principes-fondamentaux-dinotify",
+    "href": "chapter3.html#principes-fondamentaux-dinotify",
+    "title": "4  L’API Linux Inotify au Cœur du Système",
+    "section": "",
+    "text": "4.1.1 La limite structurelle : pas de récursivité automatique\ninotify surveille un répertoire donné, mais pas son contenu récursif. Si l’on ajoute /home/user/docs/ à la surveillance, les événements sur les fichiers directement dans ce répertoire seront bien remontés, mais pas ceux qui surviendront dans /home/user/docs/projets/ ou dans tout autre sous-répertoire. Cette limitation est fondamentale et impose d’implémenter soi-même la récursivité; ce que fait L-Watcher via la fonction watch_recursive(), décrite à la section suivante.\n\n\n4.1.2 Le comportement du couple IN_CREATE / IN_ATTRIB\nUn point de comportement noyau mérite une attention particulière. Lorsqu’un nouveau fichier est créé, le noyau génère systématiquement deux événements distincts et séquentiels : d’abord IN_CREATE, qui signale l’apparition du fichier, puis IN_ATTRIB, qui signale que ses attributs (permissions, propriétaire) ont été définis. Ces deux événements sont inévitables et ne peuvent pas être distingués au niveau du masque de l’appel inotify_add_watch().\nSi l’on affiche naïvement tous les événements ATTRIB reçus, chaque création de fichier génère donc un faux positif. La solution adoptée dans L-Watcher est de filtrer cet ATTRIB redondant en aval, dans le script de traitement output.sh, en mémorisant le nom du dernier fichier créé et en supprimant le premier ATTRIB qui le concerne. Ce mécanisme est détaillé au chapitre 5.",
+    "crumbs": [
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>L'API Linux Inotify au Cœur du Système</span>"
+    ]
+  },
+  {
+    "objectID": "chapter3.html#implémentation-en-langage-c",
+    "href": "chapter3.html#implémentation-en-langage-c",
+    "title": "4  L’API Linux Inotify au Cœur du Système",
+    "section": "4.2 Implémentation en Langage C",
+    "text": "4.2 Implémentation en Langage C\n\n4.2.1 Lecture du tampon d’événements par arithmétique de pointeurs\nLa structure retournée par read() sur un descripteur inotify n’est pas un tableau d’éléments de taille fixe. Chaque événement est une struct inotify_event de taille variable, car le champ name : le nom du fichier concerné est de longueur variable et suivi d’un éventuel padding. Pour parcourir correctement le tampon, il faut donc avancer manuellement le pointeur de lecture, en ajoutant à chaque itération la taille fixe de la structure plus la longueur effective du champ name :\nptr += EVENT_SIZE + event-&gt;len;\nC’est une application directe de l’arithmétique de pointeurs en C : ptr est un char * qui pointe successivement sur chaque événement dans le buffer. Cette technique est imposée par la conception de l’API et constitue un exemple concret de la gestion mémoire bas niveau que seul C permet d’exprimer aussi directement.\n\n\n4.2.2 La table de correspondance watch descriptor → chemin\nChaque appel à inotify_add_watch() retourne un watch descriptor (un entier), identifiant unique de la surveillance d’un répertoire particulier. Lorsqu’un événement arrive, il contient ce watch descriptor, mais pas le chemin complet du répertoire concerné. Pour pouvoir produire une sortie lisible, il faut donc maintenir une table de correspondance entre les watch descriptors et les chemins absolus.\nDans L-Watcher, cette table est implémentée via deux tableaux globaux parallèles :\nint wd[32];\nchar wd_path[32][512];\nint wd_count;\nwd[i] contient le watch descriptor du i-ème répertoire surveillé, et wd_path[i] contient son chemin absolu. La taille fixe de 32 entrées constitue une limite volontaire et assumée : dans le cadre du projet, surveiller plus de 32 répertoires distincts simultanément n’est pas un cas d’usage prioritaire, et une structure dynamique (liste chaînée, allocation avec realloc) aurait complexifié significativement le code sans bénéfice immédiat. Cette limite est documentée comme un choix de conception et non comme un oubli.\n\n\n4.2.3 L’algorithme watch_recursive\nLa récursivité est assurée par la fonction watch_recursive(), qui fonctionne en deux temps. Elle commence par ajouter le répertoire passé en paramètre à la surveillance inotify et à l’enregistrer dans la table de correspondance. Puis elle ouvre ce répertoire avec opendir() et itère sur son contenu avec readdir() : pour chaque entrée de type DT_DIR (en excluant . et ..), elle se rappelle récursivement avec le chemin complet du sous-répertoire.\nvoid watch_recursive(const char *path) {\n    wd[wd_count] = inotify_add_watch(fd, path, IN_ALL_EVENTS);\n    snprintf(wd_path[wd_count], 512, \"%s\", path);\n    wd_count++;\n    // ... opendir / readdir / appel récursif sur DT_DIR\n}\nCette récursivité s’effectue une fois au démarrage, pour l’arborescence existante. Mais le programme gère également le cas des sous-répertoires créés en cours d’exécution : lorsqu’un événement IN_CREATE | IN_ISDIR est détecté dans la boucle d’événements principale, watch_recursive() est appelée immédiatement sur ce nouveau répertoire, étendant dynamiquement la surveillance à la nouvelle branche de l’arborescence.\n\n\n4.2.4 Le rôle critique de fflush(stdout)\nLe binaire C et le script output.sh sont connectés par un pipe Unix (.../bin/inotify | .../scripts/output.sh). Par défaut, la sortie standard d’un programme C est bufférisée en mode bloc lorsqu’elle n’est pas connectée à un terminal, c’est-à-dire précisément dans le cas d’un pipe. Concrètement, cela signifie que les événements seraient retenus dans le buffer interne et n’atteindraient le script Bash qu’une fois ce buffer plein, introduisant un délai inacceptable pour un outil de surveillance en temps réel.\nL’appel à fflush(stdout) après chaque printf() d’événement force le vidage immédiat du buffer, garantissant que chaque événement est transmis au script de traitement sans délai. C’est un détail d’implémentation discret mais absolument essentiel au bon fonctionnement de l’architecture en pipeline.",
+    "crumbs": [
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>L'API Linux Inotify au Cœur du Système</span>"
+    ]
+  },
+  {
+    "objectID": "chapter4.html",
+    "href": "chapter4.html",
+    "title": "5  Implémentation des Modules d’Automatisation",
+    "section": "",
+    "text": "5.1 Le pipeline d’affichage, de journalisation et de comparaison (output.sh)\noutput.sh est le composant le plus complexe de la couche Bash. Il reçoit sur son entrée standard le flux brut émis par le binaire C, et en assure le traitement complet : enrichissement, affichage colorisé en console, écriture dans les journaux de session, et génération des fichiers de différences.",
+    "crumbs": [
+      "<span class='chapter-number'>5</span>  <span class='chapter-title'>Implémentation des Modules d'Automatisation</span>"
+    ]
+  },
+  {
+    "objectID": "chapter4.html#le-pipeline-daffichage-de-journalisation-et-de-comparaison-output.sh",
+    "href": "chapter4.html#le-pipeline-daffichage-de-journalisation-et-de-comparaison-output.sh",
+    "title": "5  Implémentation des Modules d’Automatisation",
+    "section": "",
+    "text": "5.1.1 Parsing du flux entrant\nLa lecture du flux s’effectue via une boucle while avec IFS=: read qui découpe chaque ligne selon le séparateur : :\nwhile IFS=: read event type path name; do\n    ...\ndone\nLes quatre champs ainsi extraits correspondent exactement au format produit par le binaire C : le type d’événement (CREATED, MODIFIED, DELETED, etc.), le type de cible (FILE ou DIRECTORY), le chemin du répertoire surveillé, et le nom du fichier ou sous-répertoire concerné.\n\n5.1.1.1 Enrichissement des événements\nPour chaque événement reçu, le script calcule l’horodatage courant et interroge le système via stat pour obtenir les permissions octales, le propriétaire et le groupe de la cible concernée. Cette interrogation est conditionnelle : pour les événements DELETED et MOVED_FROM, la cible n’existe plus au moment du traitement, et stat ne peut pas être appelé.\nif [[ \"$event\" != \"DELETED\" && \"$event\" != \"MOVED_FROM\" ]]; then\n    perms=$(stat -c \"%a\" \"$target\")\n    owner=$(stat -c \"%U\" \"$target\")\n    group=$(stat -c \"%G\" \"$target\")\nfi\n\n\n\n5.1.2 Filtrage de l’ATTRIB redondant\nComme expliqué au chapitre 2, chaque création de fichier génère systématiquement un événement ATTRIB qui lui fait immédiatement suite. Pour éviter d’afficher un faux positif à chaque création, le script maintient une variable last_created qui mémorise le nom du dernier fichier créé. Au moment de traiter un événement ATTRIB, si son nom correspond à last_created, l’événement est silencieusement supprimé et last_created est réinitialisée.\nif [[ \"$event\" == \"CREATED\" ]]; then\n    last_created=$name\n    # ... affichage et log\nelif [[ \"$event\" == \"ATTRIB\" ]]; then\n    if [ \"$name\" == \"$last_created\" ]; then\n        last_created=\"\"   # suppression silencieuse\n    else\n        # ... affichage et log normaux\n    fi\nfi\n\n\n5.1.3 Le mécanisme de différenciation\nLe cœur analytique de output.sh réside dans le traitement des événements MODIFIED. Lorsqu’un tel événement est reçu pour un fichier, le script recherche si une version de référence de ce fichier existe dans la snapshot de sauvegarde constituée au démarrage de la session.\nSi une référence est trouvée, il calcule le diff entre cette version et la version courante du fichier sur le disque :\ndiff_output=$(diff \"$backup_file\" \"/${clean_path}/${name}\")\nchanged=$(echo \"$diff_output\" | grep -c \"^[&lt;&gt;]\")\nLe nombre de lignes modifiées (changed) est affiché dans la console et consigné dans le journal de session. Le détail complet du diff est archivé dans un fichier dédié dans .../log/lwatcher/diffs/, nommé selon le chemin et la session pour garantir l’unicité.\nSi aucune référence n’est disponible (fichier créé après le démarrage de la session, par exemple), l’événement est quand même journalisé avec la mention [No backup found].\n\n\n5.1.4 Double écriture : console et log\nChaque événement est affiché sur la console et écrit dans le fichier journal .../log/lwatcher/session.log. L’affichage console utilise des codes ANSI pour la couleur ; l’écriture dans le fichier utilise printf sans codes couleur pour garantir la lisibilité du fichier texte brut.",
+    "crumbs": [
+      "<span class='chapter-number'>5</span>  <span class='chapter-title'>Implémentation des Modules d'Automatisation</span>"
+    ]
+  },
+  {
+    "objectID": "chapter4.html#snapshot-de-référence-et-historisation-backup.sh",
+    "href": "chapter4.html#snapshot-de-référence-et-historisation-backup.sh",
+    "title": "5  Implémentation des Modules d’Automatisation",
+    "section": "5.2 Snapshot de référence et historisation (backup.sh)",
+    "text": "5.2 Snapshot de référence et historisation (backup.sh)\nbackup.sh est exécuté une seule fois, au démarrage de chaque session, avant que le binaire C ne commence à remonter des événements. Son rôle est de constituer une image de référence de l’état des répertoires surveillés au moment du lancement.\n\n5.2.1 Constitution de la snapshot\nLe script lit le fichier inotify.config et, pour chaque chemin configuré, copie récursivement le contenu vers un répertoire de backup horodaté :\ndir_backup=\"$backup_dir$line\"\nmkdir -p \"$(dirname \"$dir_backup\")\"\ncp -r \"$line\" \"$dir_backup\"\nUn point d’implémentation important mérite d’être signalé. La construction du chemin de destination utilise dirname pour créer uniquement le répertoire parent, et non la destination finale elle-même. Cela évite un piège classique de cp -r : si la destination existe déjà au moment de la copie, cp -r l’imbrique à l’intérieur au lieu de la remplacer, produisant un niveau de nesting supplémentaire indésirable.\nCette snapshot est ensuite utilisée par output.sh comme base de comparaison pour tous les diffs de la session. Elle représente l’état “propre” connu du système de fichiers au moment où la surveillance a démarré.\n\n\n5.2.2 Archivage et transfert distant\nUne fois la copie effectuée, la snapshot est compressée dans une archive tar.gz horodatée :\ntar -czf \"/root/backup/$time_stamp.tar.gz\" -C \"/root/backup\" \"$time_stamp\"\nSi l’option de sauvegarde distante est activée (via le flag -r), l’archive est transmise vers le serveur distant via scp. La connexion s’appuie sur une paire de clés SSH dédiée (lwatch_key) générée spécifiquement pour la session par lwatcher, évitant l’utilisation des clés personnelles de l’utilisateur.",
+    "crumbs": [
+      "<span class='chapter-number'>5</span>  <span class='chapter-title'>Implémentation des Modules d'Automatisation</span>"
+    ]
+  },
+  {
+    "objectID": "chapter4.html#cycle-de-vie-des-données-et-maintenance-cleanup.sh",
+    "href": "chapter4.html#cycle-de-vie-des-données-et-maintenance-cleanup.sh",
+    "title": "5  Implémentation des Modules d’Automatisation",
+    "section": "5.3 Cycle de vie des données et maintenance (cleanup.sh)",
+    "text": "5.3 Cycle de vie des données et maintenance (cleanup.sh)\ncleanup.sh est déclenché automatiquement en fin de session, via un trap ... EXIT installé par le script de lancement. Qu’il s’agisse d’une fermeture normale (Ctrl+C) ou d’un arrêt via signal SIGTERM, ce script garantit que les données sont toujours correctement rangées à la sortie du programme.\n\n5.3.1 Rotation du journal courant\nPendant la session, les événements sont écrits dans un fichier temporaire .../log/lwatcher/session.log. En fin de session, ce fichier est renommé avec un horodatage permanent :\nmv \"$log_file\" \"./logs/session_$(date +%Y%m%d)_$(date +%H%M).log\"\nCette rotation garantit que chaque session dispose de son propre fichier de journal immuable, et que le fichier session.log est toujours vide au démarrage d’une nouvelle session.\n\n\n5.3.2 Purge automatique des données obsolètes\nLe script supprime ensuite tous les fichiers plus anciens que la durée de rétention configurée (max_days, 7 jours par défaut) :\nfind \"$log_dir\" -name \"session_*.log\" -mtime \"+$max_days\" -delete\nfind \"$backup_dir\" -name \"*.tar.gz\"   -mtime \"+$max_days\" -delete\nfind \"$diff_dir\"   -name \"*.txt\"      -mtime \"+$max_days\" -delete\nLa snapshot de la session courante (répertoire temporaire backup/SESSION_ID/) est également supprimée, seule l’archive .tar.gz correspondante étant conservée pour la durée de rétention.\n\n5.3.2.1 Nettoyage des artefacts SSH\nSi la fonctionnalité de sauvegarde distante était activée pour la session, cleanup.sh prend en charge la suppression de la clé SSH temporaire générée :\nssh -i ~/.ssh/lwatch_key \"${remote_backup%%:*}\" \\\n    \"sed -i '/lwatch_key/d' ~/.ssh/authorized_keys\"\nrm -f ~/.ssh/lwatch_key ~/.ssh/lwatch_key.pub\nCette étape retire d’abord l’entrée correspondante dans le fichier authorized_keys du serveur distant (via une commande SSH), puis supprime la paire de clés localement. L’objectif est de limiter la durée d’exposition de ces credentials temporaires au strict minimum nécessaire.",
+    "crumbs": [
+      "<span class='chapter-number'>5</span>  <span class='chapter-title'>Implémentation des Modules d'Automatisation</span>"
+    ]
+  },
+  {
+    "objectID": "chapter5.html",
+    "href": "chapter5.html",
+    "title": "6  Guide d’Utilisation, Déploement et Administration",
+    "section": "",
+    "text": "6.1 Prérequis et installation\nL-Watcher nécessite un système Linux avec les outils suivants disponibles : gcc pour la compilation du binaire C, make pour piloter la compilation, et les utilitaires standard bash, stat, diff, find, tar. Pour la fonctionnalité de sauvegarde distante, ssh, ssh-keygen, ssh-copy-id et scp sont également requis.",
+    "crumbs": [
+      "<span class='chapter-number'>6</span>  <span class='chapter-title'>Guide d'Utilisation, Déploement et Administration</span>"
+    ]
+  },
+  {
+    "objectID": "chapter5.html#prérequis-et-installation",
+    "href": "chapter5.html#prérequis-et-installation",
+    "title": "6  Guide d’Utilisation, Déploement et Administration",
+    "section": "",
+    "text": "L’installation s’effectue simplement avec :\n\n$ make                 # compile src/inotify.c\n$ sudo make install\n      # installe /opt/lwatcher, /etc/lwatcher,\n      # /var/log/lwatcher, /usr/local/bin/lwatcher\n$ which lwatcher       # vérification\n\nPour la désintallation et la suppréssion :\n\n$ sudo make remove     # garde les log et backups\n$ sudo make purge      # supprime tout",
+    "crumbs": [
+      "<span class='chapter-number'>6</span>  <span class='chapter-title'>Guide d'Utilisation, Déploement et Administration</span>"
+    ]
+  },
+  {
+    "objectID": "chapter5.html#configuration-des-répertoires-surveillés",
+    "href": "chapter5.html#configuration-des-répertoires-surveillés",
+    "title": "6  Guide d’Utilisation, Déploement et Administration",
+    "section": "6.2 Configuration des répertoires surveillés",
+    "text": "6.2 Configuration des répertoires surveillés\nAvant le premier lancement, il faut renseigner le fichier config/inotify.config avec les chemins à surveiller. Sa syntaxe est très simple :\n# Les lignes commençant par # sont ignorées\n# Les lignes vides sont ignorées\n\n/home/user/Documents/\n/etc/nginx/conf.d/\nChaque chemin doit être absolu et se terminer par /. Plusieurs chemins peuvent être ajoutés, chacun sur sa propre ligne.\nLes options -c, -C et -a de start.sh permettent de manipuler ce fichier directement en ligne de commande, sans avoir à l’éditer manuellement.",
+    "crumbs": [
+      "<span class='chapter-number'>6</span>  <span class='chapter-title'>Guide d'Utilisation, Déploement et Administration</span>"
+    ]
+  },
+  {
+    "objectID": "chapter5.html#maîtrise-de-linterface-en-ligne-de-commande",
+    "href": "chapter5.html#maîtrise-de-linterface-en-ligne-de-commande",
+    "title": "6  Guide d’Utilisation, Déploement et Administration",
+    "section": "6.3 Maîtrise de l’interface en ligne de commande",
+    "text": "6.3 Maîtrise de l’interface en ligne de commande\nToutes les interactions avec L-Watcher passent par start.sh. Voici le panorama complet de ses options :\n\n\n\n\n\n\n\n\nOption\nArgument\nComportement\n\n\n\n\n-h\n—\nAffiche le manuel d’aide et quitte\n\n\n-s\n—\nAffiche la liste des répertoires surveillés et quitte\n\n\n-D\n—\nVide la liste des répertoires surveillés et quitte\n\n\n-d\nN\nDéfinit la durée de rétention à N jours (défaut : 7)\n\n\n-c\nCHEMIN\nAjoute CHEMIN à la liste, puis lance la surveillance\n\n\n-C\nCHEMIN\nRemplace toute la liste par CHEMIN, puis lance la surveillance\n\n\n-a\nCHEMIN\nAjoute CHEMIN à la liste sans lancer la surveillance\n\n\n-r\nUSER@HOST:CHEMIN\nActive la sauvegarde distante via SSH/SCP\n\n\n\n\n6.3.1 Exemples d’utilisation\nLancement simple avec la configuration existante :\nlwatcher\nLancement avec une rétention de 14 jours :\nlwatcher -d 14\nAjouter un répertoire et démarrer immédiatement :\nlwatcher -c /home/user/projets/\nSurveiller uniquement un répertoire spécifique (efface les chemins précédents) :\nlwatcher -C /etc/\nAjouter un répertoire sans démarrer (pour préparer la configuration) :\nlwatcher -a /var/www/html/\nLancement avec sauvegarde distante :\nlwatcher -r admin@192.168.1.10:/backups/lwatcher\nCombiner plusieurs options :\nlwatcher -d 30 -r admin@192.168.1.10:/backups/lwatcher\n\nNote : lwatcher doit être exécuter en tant que root pour fonctionner",
+    "crumbs": [
+      "<span class='chapter-number'>6</span>  <span class='chapter-title'>Guide d'Utilisation, Déploement et Administration</span>"
+    ]
+  },
+  {
+    "objectID": "chapter5.html#lecture-et-interprétation-des-journaux-de-session",
+    "href": "chapter5.html#lecture-et-interprétation-des-journaux-de-session",
+    "title": "6  Guide d’Utilisation, Déploement et Administration",
+    "section": "6.4 Lecture et interprétation des journaux de session",
+    "text": "6.4 Lecture et interprétation des journaux de session\nUn journal de session se présente sous la forme d’un tableau aligné en colonnes :\n[Mer 17 Jun 09:14:47]  CREATED    FILE    /home/user/docs/okl/   rapport.txt  644  user  user\n[Mer 17 Jun 09:14:58]  MODIFIED   FILE    /home/user/docs/okl/   rapport.txt  644  user  user  [2 lines changed -&gt; /home/user/docs/okl/rapport.txt]\nLes colonnes, dans l’ordre, sont : l’horodatage, le type d’événement, le type de cible (FILE ou DIRECTORY), le chemin du répertoire, le nom du fichier, les permissions en octal, le propriétaire et le groupe. Pour les événements MODIFIED ayant une référence de backup, une indication du nombre de lignes modifiées et du chemin vers le diff complet est ajoutée en fin de ligne.",
+    "crumbs": [
+      "<span class='chapter-number'>6</span>  <span class='chapter-title'>Guide d'Utilisation, Déploement et Administration</span>"
+    ]
+  },
+  {
+    "objectID": "chapter5.html#utilisation-des-fichiers-de-différences",
+    "href": "chapter5.html#utilisation-des-fichiers-de-différences",
+    "title": "6  Guide d’Utilisation, Déploement et Administration",
+    "section": "6.5 Utilisation des fichiers de différences",
+    "text": "6.5 Utilisation des fichiers de différences\nLes fichiers de différences se trouvent dans .../log/diffs/. Leur nom encode le chemin du répertoire (les / remplacés par _), le nom du fichier, et l’identifiant de session. Par exemple, pour un fichier rapport.txt dans /home/user/docs/okl/ lors de la session 20260617_0934, le fichier de diff se nomme :\nhome_user_docs_okl__rapport.txt_20260617_0934.txt\nSon contenu liste chronologiquement chaque modification, avec l’horodatage et le diff au format standard Unix :\n[Mer 17 Jun 09:14:58]    /home/user/docs/okl/    rapport.txt\n 1a2\n&gt; Nouvelle ligne ajoutée\n\n[Mer 17 Jun 09:15:30]    /home/user/docs/okl/    rapport.txt\n 2c2\n&lt; Nouvelle ligne ajoutée\n&gt; Ligne modifiée\nLe format de diff utilise les conventions standard : &gt; pour une ligne ajoutée, &lt; pour une ligne supprimée, c pour une ligne changée, a pour un ajout, d pour une suppression.",
+    "crumbs": [
+      "<span class='chapter-number'>6</span>  <span class='chapter-title'>Guide d'Utilisation, Déploement et Administration</span>"
+    ]
+  },
+  {
+    "objectID": "chapter6.html",
+    "href": "chapter6.html",
+    "title": "7  Evolution de la Coception et Pivot Technique",
+    "section": "",
+    "text": "7.1 L’ambition initiale : le traçage d’acteur\nDans sa conception originale, L-Watcher devait répondre à une question plus ambitieuse que “qu’est-ce qui a changé ?” : il devait aussi répondre à “qui a fait ce changement ?”. L’idée était d’associer à chaque événement détecté l’identité de l’utilisateur ou du processus à l’origine de la modification, ce que l’on appellera le traçage d’acteur (actor tracking).\nCette fonctionnalité aurait considérablement enrichi la valeur analytique des journaux produits. Au lieu de voir simplement MODIFIED: /etc/passwd, un administrateur aurait pu lire MODIFIED: /etc/passwd  par l'utilisateur root via le processus passwd (PID 4821). L’objectif était légitime et la question posée était pertinente.\nLes tentatives d’implémentation ont cependant révélé une série d’obstacles techniques qui ont conduit à l’abandon définitif de cette fonctionnalité.",
+    "crumbs": [
+      "<span class='chapter-number'>7</span>  <span class='chapter-title'>Evolution de la Coception et Pivot Technique</span>"
+    ]
+  },
+  {
+    "objectID": "chapter6.html#les-approches-testées-et-leurs-limitations",
+    "href": "chapter6.html#les-approches-testées-et-leurs-limitations",
+    "title": "7  Evolution de la Coception et Pivot Technique",
+    "section": "7.2 Les approches testées et leurs limitations",
+    "text": "7.2 Les approches testées et leurs limitations\n\n7.2.1 Tentative 1 : inspection de /proc/&lt;PID&gt;/fd\nLa première approche consistait à scanner, au moment de la réception d’un événement inotify, le système de fichiers virtuel /proc pour trouver quel processus avait ouvert le fichier concerné. Pour chaque processus actif, on examine /proc/&lt;PID&gt;/fd/ à la recherche d’un descripteur de fichier pointant vers le fichier cible.\nEn théorie, l’idée est solide. En pratique, elle se heurte à un problème fondamental de timing. Les opérations sur les fichiers, surtout les créations et les écritures brèves sont extrêmement rapides. Au moment où l’événement inotify est reçu et traité, le processus responsable a déjà terminé son opération, fermé son descripteur de fichier, et souvent terminé son exécution. Le scan de /proc arrive toujours trop tard.\n\n\n7.2.2 Tentative 2 : lsof\nlsof (list open files) est un outil qui interroge l’état courant des fichiers ouverts sur le système. On aurait pu l’invoquer à la réception de chaque événement pour identifier le processus concerné.\nOutre le problème de timing déjà évoqué, cette approche souffre de deux défauts supplémentaires. D’abord, la latence d’exécution de lsof lui-même est non négligeable; le lancer à chaque événement aurait créé un goulot d’étranglement notable. Ensuite, lsof retourne l’état courant, pas l’état passé : si le fichier a été fermé avant l’invocation de la commande, il n’apparaît tout simplement plus dans les résultats.\n\n\n7.2.3 Tentative 3 : auditd et ausearch\nauditd est le démon d’audit du noyau Linux. Contrairement aux approches précédentes, il intercepte les appels système au moment où ils se produisent, ce qui résout le problème de timing. En théorie, il peut enregistrer précisément quel utilisateur et quel processus ont effectué chaque opération sur le système de fichiers.\nL’implémentation a été tentée avec auditctl pour configurer des règles de surveillance et ausearch pour interroger les logs d’audit produits. Cette approche s’est avérée incompatible avec l’architecture en pipeline de L-Watcher. ausearch invoqué depuis l’intérieur du pipe ne retournait aucun résultat utilisable. Plus fondamentalement, intégrer auditd dans le flux de traitement posait des problèmes de permissions (l’outil requiert des droits root), de couplage architectural (L-Watcher devenait dépendant d’un daemon externe configuré séparément), et de complexité disproportionnée par rapport à l’objectif initial.\n\n\n7.2.4 Tentative 4 : variables d’environnement et who\nD’autres pistes ont été explorées : lire /proc/&lt;PID&gt;/environ pour récupérer des informations sur l’environnement du processus, utiliser who et who am i pour identifier l’utilisateur connecté. Aucune n’a abouti à quelque chose de fiable. who ne peut pas détecter les sessions ouvertes via su, et l’identification via les variables d’environnement reste sujette aux mêmes problèmes de timing.",
+    "crumbs": [
+      "<span class='chapter-number'>7</span>  <span class='chapter-title'>Evolution de la Coception et Pivot Technique</span>"
+    ]
+  },
+  {
+    "objectID": "chapter6.html#la-décision-de-pivot",
+    "href": "chapter6.html#la-décision-de-pivot",
+    "title": "7  Evolution de la Coception et Pivot Technique",
+    "section": "7.3 La décision de pivot",
+    "text": "7.3 La décision de pivot\nFace à l’échec systématique de toutes les approches testées, la décision a été prise d’abandonner définitivement le traçage d’acteur. Cette décision n’est pas un compromis subi mais un choix raisonné.\nPremièrement, les limitations constatées ne sont pas des bugs corrigeables : elles sont inhérentes à l’architecture de l’API inotify, qui notifie après l’événement, alors que l’identification d’un acteur requiert d’être synchrone avec lui. Rendre le traçage d’acteur fiable aurait nécessité une refonte complète de la couche de capture, vraisemblablement en abandonnant inotify au profit d’une approche eBPF ou d’une intégration profonde avec auditd; deux technologies qui dépassent largement le cadre du projet.\nDeuxièmement, L-Watcher répond déjà à la question la plus utile dans la plupart des scénarios d’usage : ce qui a changé, et quand. Le scénario de démonstration typique: un fichier de configuration qui a été modifié de manière inexpliquée, est couvert par les journaux et les diffs. L’identification de l’auteur, bien que souhaitable, n’est pas indispensable à la valeur fondamentale de l’outil.\nCe parcours d’exploration et d’échec fait partie de l’histoire technique de L-Watcher et illustre une réalité du développement système : certaines fonctionnalités qui semblent simples en théorie se heurtent à des contraintes architecturales profondes qui rendent leur implémentation fiable bien plus complexe qu’anticipé.",
+    "crumbs": [
+      "<span class='chapter-number'>7</span>  <span class='chapter-title'>Evolution de la Coception et Pivot Technique</span>"
+    ]
+  },
+  {
+    "objectID": "chapter7.html",
+    "href": "chapter7.html",
+    "title": "8  Perspective et développement au future",
+    "section": "",
+    "text": "8.1 Bilan technique du projet L-Watcher\nL-Watcher remplit les objectifs qu’il s’était fixés. La surveillance est continue, récursive, et réactive. Chaque événement est capturé, enrichi, affiché et archivé. Les modifications de fichiers sont documentées au niveau du contenu, pas seulement de l’existence. Le cycle de vie des données est géré automatiquement.",
+    "crumbs": [
+      "<span class='chapter-number'>8</span>  <span class='chapter-title'>Perspective et développement au future</span>"
+    ]
+  },
+  {
+    "objectID": "chapter7.html#bilan-technique-du-projet-l-watcher",
+    "href": "chapter7.html#bilan-technique-du-projet-l-watcher",
+    "title": "8  Perspective et développement au future",
+    "section": "",
+    "text": "8.1.1 Forces du système\nLa principale force de L-Watcher est sa légèreté architecturale. L’API inotify est une interface noyau : il n’y a pas de scrutation périodique, pas de surcoût CPU en l’absence d’événements. Le binaire C se contente d’attendre sur un read() bloquant, et ne consomme des ressources que quand il y a effectivement quelque chose à traiter.\nLa traçabilité fine par diffing est la seconde force distinctive. La plupart des outils FIM simples se contentent de signaler qu’un fichier a changé ; L-Watcher documente précisément ce qui a changé, ligne par ligne, avec un historique cumulatif par fichier au sein d’une session.\nL’architecture modulaire , la séparation nette entre le moteur C et les scripts Bash connectés par un pipe standard facilite la maintenance et l’évolution indépendante de chaque composant.\n\n\n8.1.2 Limites assumées (choix de conception)\nDeux limitations sont des choix délibérés, documentés comme tels plutôt que dissimulés.\nLe plafond de 32 répertoires surveillés simultanément découle de l’utilisation de tableaux de taille fixe pour la table de correspondance watch descriptor → chemin. Ce choix simplifie significativement le code et couvre largement les cas d’usage envisagés. Une implémentation future pourrait remplacer ces tableaux statiques par une structure dynamique (realloc) pour lever cette limite.\nL’absence de traçage d’acteur est une conséquence directe des explorations techniques documentées au chapitre 4. Ce n’est pas une limitation oubliée mais une décision raisonnée, prise après avoir épuisé les approches réalistement implémentables dans ce contexte.\n\n\n8.1.3 Limitation résiduelle identifiée\nUn comportement imparfait subsiste pour les événements ATTRIB portant sur des répertoires. Dans ce cas, le calcul des permissions via stat est effectué sur le répertoire parent plutôt que sur le sous-répertoire effectivement concerné par l’événement. Ceci est dû à la manière dont le chemin de la cible est construit dans output.sh pour les événements de type DIRECTORY. Ce comportement erroné est identifié et pourrait faire l’objet d’un correctif dans une version ultérieure.",
+    "crumbs": [
+      "<span class='chapter-number'>8</span>  <span class='chapter-title'>Perspective et développement au future</span>"
+    ]
+  },
+  {
+    "objectID": "chapter7.html#évolutions-futures",
+    "href": "chapter7.html#évolutions-futures",
+    "title": "8  Perspective et développement au future",
+    "section": "8.2 Évolutions futures",
+    "text": "8.2 Évolutions futures\n\n8.2.1 Interface utilisateur textuelle (TUI)\nL’affichage actuel en colonnes fixes dans le terminal est fonctionnel mais statique. Une évolution naturelle serait de le remplacer par une interface TUI (Text User Interface) interactive, permettant par exemple de filtrer les événements affichés en temps réel par type ou par répertoire, de naviguer dans l’historique de la session, ou d’afficher le détail d’un diff directement dans l’interface. Des bibliothèques comme ncurses (pour une implémentation C) ou des outils comme dialog (pour du Bash) permettraient d’atteindre cet objectif.\n\n\n8.2.2 Dépassement du plafond de 32 répertoires\nRemplacer les tableaux statiques wd[32] et wd_path[32][512] par des structures allouées dynamiquement permettrait de lever la limite actuelle sans autre modification architecturale. C’est une évolution relativement ciblée qui rendrait L-Watcher utilisable pour surveiller des arborescences bien plus profondes.",
+    "crumbs": [
+      "<span class='chapter-number'>8</span>  <span class='chapter-title'>Perspective et développement au future</span>"
+    ]
+  },
+  {
+    "objectID": "summary.html",
+    "href": "summary.html",
+    "title": "9  Conclusion",
+    "section": "",
+    "text": "L-Watcher est un système FIM fonctionnel, documenté et maintenu. Il illustre concrètement comment combiner un composant C bas niveau avec des scripts shell pour produire un outil système complet, comment naviguer dans les limitations d’une API noyau, et comment les contraintes rencontrées en chemin peuvent être transformées en matière d’apprentissage et en décisions d’architecture explicites et défendables plutôt que d’être dissimulées .",
+    "crumbs": [
+      "<span class='chapter-number'>9</span>  <span class='chapter-title'>Conclusion</span>"
+    ]
+  }
+]
