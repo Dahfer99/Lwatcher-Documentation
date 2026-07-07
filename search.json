@@ -172,91 +172,91 @@
   {
     "objectID": "chapter5.html",
     "href": "chapter5.html",
-    "title": "6  Guide d’Utilisation, Déploement et Administration",
+    "title": "6  Guide d’Utilisation, Déploiement et Administration",
     "section": "",
     "text": "6.1 Prérequis et installation\nL-Watcher nécessite un système Linux avec les outils suivants disponibles : gcc pour la compilation du binaire C, make pour piloter la compilation, et les utilitaires standard bash, stat, diff, find, tar. Pour la fonctionnalité de sauvegarde distante, ssh, ssh-keygen, ssh-copy-id et scp sont également requis.",
     "crumbs": [
-      "<span class='chapter-number'>6</span>  <span class='chapter-title'>Guide d'Utilisation, Déploement et Administration</span>"
+      "<span class='chapter-number'>6</span>  <span class='chapter-title'>Guide d'Utilisation, Déploiement et Administration</span>"
     ]
   },
   {
     "objectID": "chapter5.html#prérequis-et-installation",
     "href": "chapter5.html#prérequis-et-installation",
-    "title": "6  Guide d’Utilisation, Déploement et Administration",
+    "title": "6  Guide d’Utilisation, Déploiement et Administration",
     "section": "",
     "text": "L’installation s’effectue simplement avec :\n\n$ make                 # compile src/inotify.c\n$ sudo make install\n      # installe /opt/lwatcher, /etc/lwatcher,\n      # /var/log/lwatcher, /usr/local/bin/lwatcher\n$ which lwatcher       # vérification\n\nPour la désintallation et la suppréssion :\n\n$ sudo make remove     # garde les log et backups\n$ sudo make purge      # supprime tout",
     "crumbs": [
-      "<span class='chapter-number'>6</span>  <span class='chapter-title'>Guide d'Utilisation, Déploement et Administration</span>"
+      "<span class='chapter-number'>6</span>  <span class='chapter-title'>Guide d'Utilisation, Déploiement et Administration</span>"
     ]
   },
   {
     "objectID": "chapter5.html#configuration-des-répertoires-surveillés",
     "href": "chapter5.html#configuration-des-répertoires-surveillés",
-    "title": "6  Guide d’Utilisation, Déploement et Administration",
+    "title": "6  Guide d’Utilisation, Déploiement et Administration",
     "section": "6.2 Configuration des répertoires surveillés",
     "text": "6.2 Configuration des répertoires surveillés\nAvant le premier lancement, il faut renseigner le fichier config/inotify.config avec les chemins à surveiller. Sa syntaxe est très simple :\n# Les lignes commençant par # sont ignorées\n# Les lignes vides sont ignorées\n\n/home/user/Documents/\n/etc/nginx/conf.d/\nChaque chemin doit être absolu et se terminer par /. Plusieurs chemins peuvent être ajoutés, chacun sur sa propre ligne.\nLes options -c, -C et -a de start.sh permettent de manipuler ce fichier directement en ligne de commande, sans avoir à l’éditer manuellement.",
     "crumbs": [
-      "<span class='chapter-number'>6</span>  <span class='chapter-title'>Guide d'Utilisation, Déploement et Administration</span>"
+      "<span class='chapter-number'>6</span>  <span class='chapter-title'>Guide d'Utilisation, Déploiement et Administration</span>"
     ]
   },
   {
     "objectID": "chapter5.html#maîtrise-de-linterface-en-ligne-de-commande",
     "href": "chapter5.html#maîtrise-de-linterface-en-ligne-de-commande",
-    "title": "6  Guide d’Utilisation, Déploement et Administration",
+    "title": "6  Guide d’Utilisation, Déploiement et Administration",
     "section": "6.3 Maîtrise de l’interface en ligne de commande",
     "text": "6.3 Maîtrise de l’interface en ligne de commande\nToutes les interactions avec L-Watcher passent par start.sh. Voici le panorama complet de ses options :\n\n\n\n\n\n\n\n\nOption\nArgument\nComportement\n\n\n\n\n-h\n—\nAffiche le manuel d’aide et quitte\n\n\n-s\n—\nAffiche la liste des répertoires surveillés et quitte\n\n\n-D\n—\nVide la liste des répertoires surveillés et quitte\n\n\n-d\nN\nDéfinit la durée de rétention à N jours (défaut : 7)\n\n\n-c\nCHEMIN\nAjoute CHEMIN à la liste, puis lance la surveillance\n\n\n-C\nCHEMIN\nRemplace toute la liste par CHEMIN, puis lance la surveillance\n\n\n-a\nCHEMIN\nAjoute CHEMIN à la liste sans lancer la surveillance\n\n\n-r\nUSER@HOST:CHEMIN\nActive la sauvegarde distante via SSH/SCP\n\n\n\n\n6.3.1 Exemples d’utilisation\nLancement simple avec la configuration existante :\nlwatcher\nLancement avec une rétention de 14 jours :\nlwatcher -d 14\nAjouter un répertoire et démarrer immédiatement :\nlwatcher -c /home/user/projets/\nSurveiller uniquement un répertoire spécifique (efface les chemins précédents) :\nlwatcher -C /etc/\nAjouter un répertoire sans démarrer (pour préparer la configuration) :\nlwatcher -a /var/www/html/\nLancement avec sauvegarde distante :\nlwatcher -r admin@192.168.1.10:/backups/lwatcher\nCombiner plusieurs options :\nlwatcher -d 30 -r admin@192.168.1.10:/backups/lwatcher\n\nNote : lwatcher doit être exécuter en tant que root pour fonctionner",
     "crumbs": [
-      "<span class='chapter-number'>6</span>  <span class='chapter-title'>Guide d'Utilisation, Déploement et Administration</span>"
+      "<span class='chapter-number'>6</span>  <span class='chapter-title'>Guide d'Utilisation, Déploiement et Administration</span>"
     ]
   },
   {
     "objectID": "chapter5.html#lecture-et-interprétation-des-journaux-de-session",
     "href": "chapter5.html#lecture-et-interprétation-des-journaux-de-session",
-    "title": "6  Guide d’Utilisation, Déploement et Administration",
+    "title": "6  Guide d’Utilisation, Déploiement et Administration",
     "section": "6.4 Lecture et interprétation des journaux de session",
     "text": "6.4 Lecture et interprétation des journaux de session\nUn journal de session se présente sous la forme d’un tableau aligné en colonnes :\n[Mer 17 Jun 09:14:47]  CREATED    FILE    /home/user/docs/okl/   rapport.txt  644  user  user\n[Mer 17 Jun 09:14:58]  MODIFIED   FILE    /home/user/docs/okl/   rapport.txt  644  user  user  [2 lines changed -&gt; /home/user/docs/okl/rapport.txt]\nLes colonnes, dans l’ordre, sont : l’horodatage, le type d’événement, le type de cible (FILE ou DIRECTORY), le chemin du répertoire, le nom du fichier, les permissions en octal, le propriétaire et le groupe. Pour les événements MODIFIED ayant une référence de backup, une indication du nombre de lignes modifiées et du chemin vers le diff complet est ajoutée en fin de ligne.",
     "crumbs": [
-      "<span class='chapter-number'>6</span>  <span class='chapter-title'>Guide d'Utilisation, Déploement et Administration</span>"
+      "<span class='chapter-number'>6</span>  <span class='chapter-title'>Guide d'Utilisation, Déploiement et Administration</span>"
     ]
   },
   {
     "objectID": "chapter5.html#utilisation-des-fichiers-de-différences",
     "href": "chapter5.html#utilisation-des-fichiers-de-différences",
-    "title": "6  Guide d’Utilisation, Déploement et Administration",
+    "title": "6  Guide d’Utilisation, Déploiement et Administration",
     "section": "6.5 Utilisation des fichiers de différences",
     "text": "6.5 Utilisation des fichiers de différences\nLes fichiers de différences se trouvent dans .../log/diffs/. Leur nom encode le chemin du répertoire (les / remplacés par _), le nom du fichier, et l’identifiant de session. Par exemple, pour un fichier rapport.txt dans /home/user/docs/okl/ lors de la session 20260617_0934, le fichier de diff se nomme :\nhome_user_docs_okl__rapport.txt_20260617_0934.txt\nSon contenu liste chronologiquement chaque modification, avec l’horodatage et le diff au format standard Unix :\n[Mer 17 Jun 09:14:58]    /home/user/docs/okl/    rapport.txt\n 1a2\n&gt; Nouvelle ligne ajoutée\n\n[Mer 17 Jun 09:15:30]    /home/user/docs/okl/    rapport.txt\n 2c2\n&lt; Nouvelle ligne ajoutée\n&gt; Ligne modifiée\nLe format de diff utilise les conventions standard : &gt; pour une ligne ajoutée, &lt; pour une ligne supprimée, c pour une ligne changée, a pour un ajout, d pour une suppression.",
     "crumbs": [
-      "<span class='chapter-number'>6</span>  <span class='chapter-title'>Guide d'Utilisation, Déploement et Administration</span>"
+      "<span class='chapter-number'>6</span>  <span class='chapter-title'>Guide d'Utilisation, Déploiement et Administration</span>"
     ]
   },
   {
     "objectID": "chapter6.html",
     "href": "chapter6.html",
-    "title": "7  Evolution de la Coception et Pivot Technique",
+    "title": "7  Evolution de la Conception et Pivot Technique",
     "section": "",
     "text": "7.1 L’ambition initiale : le traçage d’acteur\nDans sa conception originale, L-Watcher devait répondre à une question plus ambitieuse que “qu’est-ce qui a changé ?” : il devait aussi répondre à “qui a fait ce changement ?”. L’idée était d’associer à chaque événement détecté l’identité de l’utilisateur ou du processus à l’origine de la modification, ce que l’on appellera le traçage d’acteur (actor tracking).\nCette fonctionnalité aurait considérablement enrichi la valeur analytique des journaux produits. Au lieu de voir simplement MODIFIED: /etc/passwd, un administrateur aurait pu lire MODIFIED: /etc/passwd  par l'utilisateur root via le processus passwd (PID 4821). L’objectif était légitime et la question posée était pertinente.\nLes tentatives d’implémentation ont cependant révélé une série d’obstacles techniques qui ont conduit à l’abandon définitif de cette fonctionnalité.",
     "crumbs": [
-      "<span class='chapter-number'>7</span>  <span class='chapter-title'>Evolution de la Coception et Pivot Technique</span>"
+      "<span class='chapter-number'>7</span>  <span class='chapter-title'>Evolution de la Conception et Pivot Technique</span>"
     ]
   },
   {
     "objectID": "chapter6.html#les-approches-testées-et-leurs-limitations",
     "href": "chapter6.html#les-approches-testées-et-leurs-limitations",
-    "title": "7  Evolution de la Coception et Pivot Technique",
+    "title": "7  Evolution de la Conception et Pivot Technique",
     "section": "7.2 Les approches testées et leurs limitations",
     "text": "7.2 Les approches testées et leurs limitations\n\n7.2.1 Tentative 1 : inspection de /proc/&lt;PID&gt;/fd\nLa première approche consistait à scanner, au moment de la réception d’un événement inotify, le système de fichiers virtuel /proc pour trouver quel processus avait ouvert le fichier concerné. Pour chaque processus actif, on examine /proc/&lt;PID&gt;/fd/ à la recherche d’un descripteur de fichier pointant vers le fichier cible.\nEn théorie, l’idée est solide. En pratique, elle se heurte à un problème fondamental de timing. Les opérations sur les fichiers, surtout les créations et les écritures brèves sont extrêmement rapides. Au moment où l’événement inotify est reçu et traité, le processus responsable a déjà terminé son opération, fermé son descripteur de fichier, et souvent terminé son exécution. Le scan de /proc arrive toujours trop tard.\n\n\n7.2.2 Tentative 2 : lsof\nlsof (list open files) est un outil qui interroge l’état courant des fichiers ouverts sur le système. On aurait pu l’invoquer à la réception de chaque événement pour identifier le processus concerné.\nOutre le problème de timing déjà évoqué, cette approche souffre de deux défauts supplémentaires. D’abord, la latence d’exécution de lsof lui-même est non négligeable; le lancer à chaque événement aurait créé un goulot d’étranglement notable. Ensuite, lsof retourne l’état courant, pas l’état passé : si le fichier a été fermé avant l’invocation de la commande, il n’apparaît tout simplement plus dans les résultats.\n\n\n7.2.3 Tentative 3 : auditd et ausearch\nauditd est le démon d’audit du noyau Linux. Contrairement aux approches précédentes, il intercepte les appels système au moment où ils se produisent, ce qui résout le problème de timing. En théorie, il peut enregistrer précisément quel utilisateur et quel processus ont effectué chaque opération sur le système de fichiers.\nL’implémentation a été tentée avec auditctl pour configurer des règles de surveillance et ausearch pour interroger les logs d’audit produits. Cette approche s’est avérée incompatible avec l’architecture en pipeline de L-Watcher. ausearch invoqué depuis l’intérieur du pipe ne retournait aucun résultat utilisable. Plus fondamentalement, intégrer auditd dans le flux de traitement posait des problèmes de permissions (l’outil requiert des droits root), de couplage architectural (L-Watcher devenait dépendant d’un daemon externe configuré séparément), et de complexité disproportionnée par rapport à l’objectif initial.\n\n\n7.2.4 Tentative 4 : variables d’environnement et who\nD’autres pistes ont été explorées : lire /proc/&lt;PID&gt;/environ pour récupérer des informations sur l’environnement du processus, utiliser who et who am i pour identifier l’utilisateur connecté. Aucune n’a abouti à quelque chose de fiable. who ne peut pas détecter les sessions ouvertes via su, et l’identification via les variables d’environnement reste sujette aux mêmes problèmes de timing.",
     "crumbs": [
-      "<span class='chapter-number'>7</span>  <span class='chapter-title'>Evolution de la Coception et Pivot Technique</span>"
+      "<span class='chapter-number'>7</span>  <span class='chapter-title'>Evolution de la Conception et Pivot Technique</span>"
     ]
   },
   {
     "objectID": "chapter6.html#la-décision-de-pivot",
     "href": "chapter6.html#la-décision-de-pivot",
-    "title": "7  Evolution de la Coception et Pivot Technique",
+    "title": "7  Evolution de la Conception et Pivot Technique",
     "section": "7.3 La décision de pivot",
     "text": "7.3 La décision de pivot\nFace à l’échec systématique de toutes les approches testées, la décision a été prise d’abandonner définitivement le traçage d’acteur. Cette décision n’est pas un compromis subi mais un choix raisonné.\nPremièrement, les limitations constatées ne sont pas des bugs corrigeables : elles sont inhérentes à l’architecture de l’API inotify, qui notifie après l’événement, alors que l’identification d’un acteur requiert d’être synchrone avec lui. Rendre le traçage d’acteur fiable aurait nécessité une refonte complète de la couche de capture, vraisemblablement en abandonnant inotify au profit d’une approche eBPF ou d’une intégration profonde avec auditd; deux technologies qui dépassent largement le cadre du projet.\nDeuxièmement, L-Watcher répond déjà à la question la plus utile dans la plupart des scénarios d’usage : ce qui a changé, et quand. Le scénario de démonstration typique: un fichier de configuration qui a été modifié de manière inexpliquée, est couvert par les journaux et les diffs. L’identification de l’auteur, bien que souhaitable, n’est pas indispensable à la valeur fondamentale de l’outil.\nCe parcours d’exploration et d’échec fait partie de l’histoire technique de L-Watcher et illustre une réalité du développement système : certaines fonctionnalités qui semblent simples en théorie se heurtent à des contraintes architecturales profondes qui rendent leur implémentation fiable bien plus complexe qu’anticipé.",
     "crumbs": [
-      "<span class='chapter-number'>7</span>  <span class='chapter-title'>Evolution de la Coception et Pivot Technique</span>"
+      "<span class='chapter-number'>7</span>  <span class='chapter-title'>Evolution de la Conception et Pivot Technique</span>"
     ]
   },
   {
